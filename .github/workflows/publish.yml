@@ -1,0 +1,45 @@
+name: Publish to VS Marketplace
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: 1. Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.GH_SECRET }}
+          workflow: release_build_and_deploy.yml
+          workflow_conclusion: success
+          
+      - name: 2. Parse Artifact Manifest
+        id: artifact_manifest
+        uses: ActionsTools/read-json-action@main
+        with:
+          file_path: ./artifact/CodingWithCalvin.ProjectRenamifier.info
+          
+      - name: 3. Create Tag & Release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          artifacts: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
+          generateReleaseNotes: true
+          makeLatest: true
+          token: ${{ secrets.GH_SECRET }}
+          commit: ${{ steps.artifact_manifest.outputs.sha }}
+          tag: ${{ steps.artifact_manifest.outputs.version }}
+          
+      - name: 4. Publish Release to Marketplace
+        if: success()
+        uses: CodingWithCalvin/GHA-VSMarketplacePublisher@v1
+        with:
+          marketplace-pat: ${{ secrets.VS_PAT }}
+          publish-manifest-path: ./resources/extension.manifest.json
+          vsix-path: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
+
+

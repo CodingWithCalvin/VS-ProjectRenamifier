@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json.schemastore.org/vsix-publish",
+  "categories": [
+    "coding",
+    "other",
+    "programming languages"
+  ],
+  "identity": {
+    "internalName": "VS-ProjectRenamifier"
+  },
+  "overview": "../README.md",
+  "publisher": "CodingWithCalvin",
+  "qna": false,
+  "repo": "https://www.github.com/CodingWithCalvin/VS-ProjectRenamifier"
+}

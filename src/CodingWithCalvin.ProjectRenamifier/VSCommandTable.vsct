@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="ProjectRenamifier">
+	  <Buttons>
+		  <Button guid="CommandSetGuid" id="RenamifyProjectCommandId" type="Button">
+			  <Icon guid="IconGuid" id="FolderIcon" />
+			  <Strings>
+				  <ButtonText>Renamify Project</ButtonText>
+			  </Strings>
+		  </Button>
+	  </Buttons>
+
+	  <Bitmaps>
+		  <Bitmap guid="IconGuid" usedList="FolderIcon" href="../../resources/folder-icon.png" />
+	  </Bitmaps>
+  </Commands>
+
+	<CommandPlacements>
+		<CommandPlacement guid="CommandSetGuid" id="RenamifyProjectCommandId" priority="0x0100">
+			<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_EXPLORE"  />
+		</CommandPlacement>
+	</CommandPlacements>
+
+  <Symbols>
+	  <GuidSymbol name="ProjectRenamifier" value="{57c39070-ff59-4bf6-8be3-1f4305ff1ec4}" />
+
+	  <GuidSymbol name="CommandSetGuid" value="{1577166d-7d58-4ef1-af82-520a8966ae67}">
+		  <IDSymbol name="RenamifyProjectCommandId" value="0x0100" />
+	  </GuidSymbol>
+
+	  <GuidSymbol name="IconGuid" value="{6a050d5f-fb67-4d45-b6fc-f6f2612aa8ad}">
+		  <IDSymbol name="FolderIcon" value="1" />
+	  </GuidSymbol>
+  </Symbols>
+</CommandTable>
