@@ -67,10 +67,9 @@ namespace CodingWithCalvin.ProjectRenamifier
             var dialog = new RenameProjectDialog(currentName);
 
             // Set the owner to the VS main window for proper modal behavior
-            var hwnd = new IntPtr(dte.MainWindow.HWnd);
             var helper = new WindowInteropHelper(dialog)
             {
-                Owner = hwnd
+                Owner = dte.MainWindow.HWnd
             };
 
             if (dialog.ShowDialog() != true)
