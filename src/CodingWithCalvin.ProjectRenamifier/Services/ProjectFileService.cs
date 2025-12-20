@@ -1,3 +1,4 @@
+using System.IO;
 using System.Xml;
 
 namespace CodingWithCalvin.ProjectRenamifier.Services
@@ -7,6 +8,24 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
     /// </summary>
     internal static class ProjectFileService
     {
+        /// <summary>
+        /// Renames the project file on disk.
+        /// </summary>
+        /// <param name="projectFilePath">Full path to the current .csproj file.</param>
+        /// <param name="newName">The new project name (without extension).</param>
+        /// <returns>The new full path to the renamed project file.</returns>
+        public static string RenameProjectFile(string projectFilePath, string newName)
+        {
+            var directory = Path.GetDirectoryName(projectFilePath);
+            var extension = Path.GetExtension(projectFilePath);
+            var newFileName = newName + extension;
+            var newFilePath = Path.Combine(directory, newFileName);
+
+            File.Move(projectFilePath, newFilePath);
+
+            return newFilePath;
+        }
+
         /// <summary>
         /// Updates the RootNamespace and AssemblyName elements in a project file
         /// if they match the old project name.
