@@ -1,14 +1,134 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using EnvDTE;
 
 namespace CodingWithCalvin.ProjectRenamifier.Services
 {
     /// <summary>
-    /// Service for updating namespace declarations in source files.
+    /// Service for updating namespace declarations and using statements in source files.
     /// </summary>
     internal static class SourceFileService
     {
+        /// <summary>
+        /// Updates using statements in all .cs files across the entire solution.
+        /// </summary>
+        /// <param name="solution">The solution to scan.</param>
+        /// <param name="oldNamespace">The old namespace to find.</param>
+        /// <param name="newNamespace">The new namespace to replace with.</param>
+        /// <returns>The number of files modified.</returns>
+        public static int UpdateUsingStatementsInSolution(Solution solution, string oldNamespace, string newNamespace)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var modifiedCount = 0;
+
+            foreach (Project project in solution.Projects)
+            {
+                modifiedCount += UpdateUsingStatementsInProjectTree(project, oldNamespace, newNamespace);
+            }
+
+            return modifiedCount;
+        }
+
+        /// <summary>
+        /// Recursively updates using statements in a project (handles solution folders).
+        /// </summary>
+        private static int UpdateUsingStatementsInProjectTree(Project project, string oldNamespace, string newNamespace)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (project == null)
+            {
+                return 0;
+            }
+
+            // Handle solution folders
+            if (project.Kind == EnvDTE.Constants.vsProjectKindSolutionItems)
+            {
+                var count = 0;
+                foreach (ProjectItem item in project.ProjectItems)
+                {
+                    if (item.SubProject != null)
+                    {
+                        count += UpdateUsingStatementsInProjectTree(item.SubProject, oldNamespace, newNamespace);
+                    }
+                }
+                return count;
+            }
+
+            // Process actual project
+            if (!string.IsNullOrEmpty(project.FullName) && File.Exists(project.FullName))
+            {
+                var projectDirectory = Path.GetDirectoryName(project.FullName);
+                if (!string.IsNullOrEmpty(projectDirectory) && Directory.Exists(projectDirectory))
+                {
+                    return UpdateUsingStatementsInDirectory(projectDirectory, oldNamespace, newNamespace);
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Updates using statements in all .cs files within a directory.
+        /// </summary>
+        private static int UpdateUsingStatementsInDirectory(string directory, string oldNamespace, string newNamespace)
+        {
+            var csFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories);
+            var modifiedCount = 0;
+
+            foreach (var filePath in csFiles)
+            {
+                if (UpdateUsingStatementsInFile(filePath, oldNamespace, newNamespace))
+                {
+                    modifiedCount++;
+                }
+            }
+
+            return modifiedCount;
+        }
+
+        /// <summary>
+        /// Updates using statements in a single source file.
+        /// </summary>
+        /// <param name="filePath">Full path to the .cs file.</param>
+        /// <param name="oldNamespace">The old namespace to find.</param>
+        /// <param name="newNamespace">The new namespace to replace with.</param>
+        /// <returns>True if the file was modified, false otherwise.</returns>
+        public static bool UpdateUsingStatementsInFile(string filePath, string oldNamespace, string newNamespace)
+        {
+            var encoding = DetectEncoding(filePath);
+            var content = File.ReadAllText(filePath, encoding);
+            var originalContent = content;
+
+            // Pattern for: using OldName;
+            // Also handles nested: using OldName.SubNamespace;
+            var usingPattern = $@"(\busing\s+){Regex.Escape(oldNamespace)}(\s*;|\.[\w.]*\s*;)";
+            content = Regex.Replace(content, usingPattern, $"$1{newNamespace}$2");
+
+            // Pattern for using aliases: using Alias = OldName.Type;
+            // Also handles: using Alias = OldName;
+            var aliasPattern = $@"(\busing\s+\w+\s*=\s*){Regex.Escape(oldNamespace)}(\.[\w.]*)?(\s*;)";
+            content = Regex.Replace(content, aliasPattern, $"$1{newNamespace}$2$3");
+
+            // Pattern for global using: global using OldName;
+            var globalUsingPattern = $@"(\bglobal\s+using\s+){Regex.Escape(oldNamespace)}(\s*;|\.[\w.]*\s*;)";
+            content = Regex.Replace(content, globalUsingPattern, $"$1{newNamespace}$2");
+
+            // Pattern for using static: using static OldName.ClassName;
+            var staticUsingPattern = $@"(\busing\s+static\s+){Regex.Escape(oldNamespace)}(\.[\w.]+\s*;)";
+            content = Regex.Replace(content, staticUsingPattern, $"$1{newNamespace}$2");
+
+            if (content != originalContent)
+            {
+                File.WriteAllText(filePath, content, encoding);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Updates namespace declarations in all .cs files within the project directory.
         /// </summary>
