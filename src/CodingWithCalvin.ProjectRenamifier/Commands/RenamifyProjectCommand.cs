@@ -89,9 +89,11 @@ namespace CodingWithCalvin.ProjectRenamifier
             // Rename the project file on disk
             projectFilePath = ProjectFileService.RenameProjectFile(projectFilePath, newName);
 
+            // Rename parent directory if it matches the old project name
+            projectFilePath = ProjectFileService.RenameParentDirectoryIfMatches(projectFilePath, currentName, newName);
+
             // TODO: Implement remaining rename operations
             // See open issues for requirements:
-            // - #21: Rename parent directory if it matches project name
             // - #22: Remove and re-add project to solution
             // - #23: Update project references
             // - #9: Update using statements across solution

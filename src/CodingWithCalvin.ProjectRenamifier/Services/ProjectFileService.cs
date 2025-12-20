@@ -27,6 +27,39 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
         }
 
         /// <summary>
+        /// Renames the parent directory if its name matches the old project name.
+        /// </summary>
+        /// <param name="projectFilePath">Full path to the .csproj file.</param>
+        /// <param name="oldName">The old project name to match against.</param>
+        /// <param name="newName">The new project name.</param>
+        /// <returns>The new full path to the project file after directory rename, or the original path if no rename occurred.</returns>
+        public static string RenameParentDirectoryIfMatches(string projectFilePath, string oldName, string newName)
+        {
+            var projectDirectory = Path.GetDirectoryName(projectFilePath);
+            var parentDirectory = Directory.GetParent(projectDirectory);
+
+            if (parentDirectory == null)
+            {
+                return projectFilePath;
+            }
+
+            var directoryName = new DirectoryInfo(projectDirectory).Name;
+
+            // Only rename if directory name matches the old project name
+            if (!directoryName.Equals(oldName, StringComparison.OrdinalIgnoreCase))
+            {
+                return projectFilePath;
+            }
+
+            var newDirectoryPath = Path.Combine(parentDirectory.FullName, newName);
+            Directory.Move(projectDirectory, newDirectoryPath);
+
+            // Return the new project file path
+            var fileName = Path.GetFileName(projectFilePath);
+            return Path.Combine(newDirectoryPath, fileName);
+        }
+
+        /// <summary>
         /// Updates the RootNamespace and AssemblyName elements in a project file
         /// if they match the old project name.
         /// </summary>
