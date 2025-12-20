@@ -80,6 +80,9 @@ namespace CodingWithCalvin.ProjectRenamifier
             var newName = dialog.NewProjectName;
             var projectFilePath = project.FullName;
 
+            // Remove project from solution before file operations
+            dte.Solution.Remove(project);
+
             // Update RootNamespace and AssemblyName in .csproj
             ProjectFileService.UpdateProjectFile(projectFilePath, currentName, newName);
 
@@ -92,9 +95,11 @@ namespace CodingWithCalvin.ProjectRenamifier
             // Rename parent directory if it matches the old project name
             projectFilePath = ProjectFileService.RenameParentDirectoryIfMatches(projectFilePath, currentName, newName);
 
+            // Re-add project to solution with new path
+            dte.Solution.AddFromFile(projectFilePath);
+
             // TODO: Implement remaining rename operations
             // See open issues for requirements:
-            // - #22: Remove and re-add project to solution
             // - #23: Update project references
             // - #9: Update using statements across solution
             // - #11: Solution folder support
