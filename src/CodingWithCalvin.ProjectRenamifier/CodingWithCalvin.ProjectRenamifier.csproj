@@ -70,6 +70,7 @@
       <DependentUpon>RenameProjectDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ProjectRenamifierPackage.cs" />
+    <Compile Include="Services\ProjectFileService.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -109,6 +110,7 @@
     <Reference Include="System" />
     <Reference Include="System.Design" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Xaml" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
