@@ -84,6 +84,9 @@ namespace CodingWithCalvin.ProjectRenamifier
             var referencingProjects = ProjectReferenceService.FindProjectsReferencingTarget(dte.Solution, projectFilePath);
             var oldProjectFilePath = projectFilePath;
 
+            // Capture the parent solution folder before removal
+            var parentSolutionFolder = SolutionFolderService.GetParentSolutionFolder(project);
+
             // Remove project from solution before file operations
             dte.Solution.Remove(project);
 
@@ -102,15 +105,14 @@ namespace CodingWithCalvin.ProjectRenamifier
             // Update references in projects that referenced this project
             ProjectReferenceService.UpdateProjectReferences(referencingProjects, oldProjectFilePath, projectFilePath);
 
-            // Re-add project to solution with new path
-            dte.Solution.AddFromFile(projectFilePath);
+            // Re-add project to solution, preserving solution folder location
+            SolutionFolderService.AddProjectToSolution(dte.Solution, projectFilePath, parentSolutionFolder);
 
             // Update using statements across the entire solution
             SourceFileService.UpdateUsingStatementsInSolution(dte.Solution, currentName, newName);
 
             // TODO: Implement remaining rename operations
             // See open issues for requirements:
-            // - #11: Solution folder support
             // - #12: Progress indication
             // - #13: Error handling and rollback
         }
