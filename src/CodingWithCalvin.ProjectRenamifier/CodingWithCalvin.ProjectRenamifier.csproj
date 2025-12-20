@@ -69,6 +69,9 @@
     <Compile Include="Dialogs\RenameProjectDialog.xaml.cs">
       <DependentUpon>RenameProjectDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\RenameProgressDialog.xaml.cs">
+      <DependentUpon>RenameProgressDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProjectRenamifierPackage.cs" />
     <Compile Include="Services\ProjectFileService.cs" />
     <Compile Include="Services\ProjectReferenceService.cs" />
@@ -87,6 +90,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Dialogs\RenameProjectDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\RenameProgressDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
