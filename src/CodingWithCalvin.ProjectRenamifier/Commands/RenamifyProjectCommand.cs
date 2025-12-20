@@ -80,6 +80,7 @@ namespace CodingWithCalvin.ProjectRenamifier
 
             var newName = dialog.NewProjectName;
             var projectFilePath = project.FullName;
+            var originalProjectFilePath = projectFilePath;
 
             // Show progress dialog
             var progressDialog = new RenameProgressDialog(currentName);
@@ -90,77 +91,116 @@ namespace CodingWithCalvin.ProjectRenamifier
             progressDialog.Show();
 
             var stepIndex = 0;
+            var projectRemovedFromSolution = false;
+            var projectReaddedToSolution = false;
+            System.Collections.Generic.List<string> referencingProjects = null;
+            Project parentSolutionFolder = null;
 
-            // Step 1: Collect projects that reference this project before removal
-            ExecuteStep(progressDialog, stepIndex++, () =>
+            try
             {
-                return ProjectReferenceService.FindProjectsReferencingTarget(dte.Solution, projectFilePath);
-            }, out var referencingProjects);
-            var oldProjectFilePath = projectFilePath;
+                // Step 1: Collect projects that reference this project before removal
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    return ProjectReferenceService.FindProjectsReferencingTarget(dte.Solution, projectFilePath);
+                }, out referencingProjects);
+                var oldProjectFilePath = projectFilePath;
 
-            // Step 2: Capture the parent solution folder before removal
-            ExecuteStep(progressDialog, stepIndex++, () =>
+                // Step 2: Capture the parent solution folder before removal
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    return SolutionFolderService.GetParentSolutionFolder(project);
+                }, out parentSolutionFolder);
+
+                // Step 3: Remove project from solution before file operations
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    dte.Solution.Remove(project);
+                    projectRemovedFromSolution = true;
+                });
+
+                // Step 4: Update RootNamespace and AssemblyName in .csproj
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    ProjectFileService.UpdateProjectFile(projectFilePath, currentName, newName);
+                });
+
+                // Step 5: Update namespace declarations in source files
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    SourceFileService.UpdateNamespacesInProject(projectFilePath, currentName, newName);
+                });
+
+                // Step 6: Rename the project file on disk
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    return ProjectFileService.RenameProjectFile(projectFilePath, newName);
+                }, out projectFilePath);
+
+                // Step 7: Rename parent directory if it matches the old project name
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    return ProjectFileService.RenameParentDirectoryIfMatches(projectFilePath, currentName, newName);
+                }, out projectFilePath);
+
+                // Step 8: Update references in projects that referenced this project
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    ProjectReferenceService.UpdateProjectReferences(referencingProjects, oldProjectFilePath, projectFilePath);
+                });
+
+                // Step 9: Re-add project to solution, preserving solution folder location
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    SolutionFolderService.AddProjectToSolution(dte.Solution, projectFilePath, parentSolutionFolder);
+                    projectReaddedToSolution = true;
+                });
+
+                // Step 10: Update using statements across the entire solution
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    SourceFileService.UpdateUsingStatementsInSolution(dte.Solution, currentName, newName);
+                });
+
+                // Mark as complete and close after a brief delay
+                progressDialog.Complete();
+                DoEvents();
+                System.Threading.Thread.Sleep(500);
+                progressDialog.Close();
+            }
+            catch (Exception ex)
             {
-                return SolutionFolderService.GetParentSolutionFolder(project);
-            }, out var parentSolutionFolder);
+                // Mark the current step as failed
+                progressDialog.FailStep(stepIndex, ex.Message);
+                DoEvents();
 
-            // Step 3: Remove project from solution before file operations
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                dte.Solution.Remove(project);
-            });
+                // Attempt rollback if project was removed but not re-added
+                if (projectRemovedFromSolution && !projectReaddedToSolution)
+                {
+                    try
+                    {
+                        // Try to re-add the project at its current location
+                        var currentProjectPath = File.Exists(projectFilePath) ? projectFilePath : originalProjectFilePath;
+                        if (File.Exists(currentProjectPath))
+                        {
+                            SolutionFolderService.AddProjectToSolution(dte.Solution, currentProjectPath, parentSolutionFolder);
+                        }
+                    }
+                    catch
+                    {
+                        // Rollback failed, nothing more we can do
+                    }
+                }
 
-            // Step 4: Update RootNamespace and AssemblyName in .csproj
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                ProjectFileService.UpdateProjectFile(projectFilePath, currentName, newName);
-            });
+                // Show error message
+                System.Windows.MessageBox.Show(
+                    $"An error occurred while renaming the project:\n\n{ex.Message}\n\n" +
+                    "The operation has been aborted. The project may be in a partially renamed state.",
+                    "Rename Failed",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
 
-            // Step 5: Update namespace declarations in source files
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                SourceFileService.UpdateNamespacesInProject(projectFilePath, currentName, newName);
-            });
-
-            // Step 6: Rename the project file on disk
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                return ProjectFileService.RenameProjectFile(projectFilePath, newName);
-            }, out projectFilePath);
-
-            // Step 7: Rename parent directory if it matches the old project name
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                return ProjectFileService.RenameParentDirectoryIfMatches(projectFilePath, currentName, newName);
-            }, out projectFilePath);
-
-            // Step 8: Update references in projects that referenced this project
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                ProjectReferenceService.UpdateProjectReferences(referencingProjects, oldProjectFilePath, projectFilePath);
-            });
-
-            // Step 9: Re-add project to solution, preserving solution folder location
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                SolutionFolderService.AddProjectToSolution(dte.Solution, projectFilePath, parentSolutionFolder);
-            });
-
-            // Step 10: Update using statements across the entire solution
-            ExecuteStep(progressDialog, stepIndex++, () =>
-            {
-                SourceFileService.UpdateUsingStatementsInSolution(dte.Solution, currentName, newName);
-            });
-
-            // Mark as complete and close after a brief delay
-            progressDialog.Complete();
-            DoEvents();
-            System.Threading.Thread.Sleep(500);
-            progressDialog.Close();
-
-            // TODO: Implement remaining rename operations
-            // See open issues for requirements:
-            // - #13: Error handling and rollback
+                progressDialog.Close();
+            }
         }
 
         private void ExecuteStep(RenameProgressDialog dialog, int stepIndex, Action action)
