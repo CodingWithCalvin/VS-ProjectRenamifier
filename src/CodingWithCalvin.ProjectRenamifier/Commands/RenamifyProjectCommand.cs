@@ -83,9 +83,11 @@ namespace CodingWithCalvin.ProjectRenamifier
             // Update RootNamespace and AssemblyName in .csproj
             ProjectFileService.UpdateProjectFile(projectFilePath, currentName, newName);
 
+            // Update namespace declarations in source files
+            SourceFileService.UpdateNamespacesInProject(projectFilePath, currentName, newName);
+
             // TODO: Implement remaining rename operations
             // See open issues for requirements:
-            // - #8: Update namespace declarations in source files
             // - #9: Update using statements across solution
             // - #11: Solution folder support
             // - #12: Progress indication
