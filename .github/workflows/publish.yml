@@ -3,37 +3,41 @@ name: Publish to VS Marketplace
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   publish:
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.artifact_manifest.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: 1. Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
-          github_token: ${{ secrets.GH_SECRET }}
           workflow: release_build_and_deploy.yml
           workflow_conclusion: success
-          
+
       - name: 2. Parse Artifact Manifest
         id: artifact_manifest
         uses: ActionsTools/read-json-action@main
         with:
           file_path: ./artifact/CodingWithCalvin.ProjectRenamifier.info
-          
+
       - name: 3. Create Tag & Release
         uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
           generateReleaseNotes: true
           makeLatest: true
-          token: ${{ secrets.GH_SECRET }}
           commit: ${{ steps.artifact_manifest.outputs.sha }}
           tag: ${{ steps.artifact_manifest.outputs.version }}
-          
+
       - name: 4. Publish Release to Marketplace
         if: success()
         uses: CodingWithCalvin/GHA-VSMarketplacePublisher@v1
@@ -42,4 +46,16 @@ jobs:
           publish-manifest-path: ./resources/extension.manifest.json
           vsix-path: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
 
+  notify:
+    needs: publish
+    uses: CodingWithCalvin/.github/.github/workflows/bluesky-post.yml@main
+    with:
+      post_text: |
+        🚀 Project Renamifier v${{ needs.publish.outputs.version }} for #VisualStudio has been released!
 
+        [Check out the release notes here!](https://github.com/${{ github.repository }}/releases/tag/${{ needs.publish.outputs.version }})
+
+        Marketplace: https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier
+    secrets:
+      BLUESKY_USERNAME: ${{ secrets.BLUESKY_USERNAME }}
+      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
