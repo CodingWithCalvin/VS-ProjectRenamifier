@@ -138,9 +138,11 @@
   <ItemGroup>
     <Content Include="..\..\resources\folder-icon.png">
       <Link>Resources\folder-icon.png</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\..\resources\logo.png">
       <Link>Resources\logo.png</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
