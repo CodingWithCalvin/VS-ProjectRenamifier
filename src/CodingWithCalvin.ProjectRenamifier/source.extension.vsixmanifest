@@ -2,8 +2,8 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
         <Identity Id="VS-ProjectRenamifier" Version="1.0" Language="en-US" Publisher="Coding With Calvin" />
-        <DisplayName>VS-ProjectRenamifier</DisplayName>
-        <Description xml:space="preserve">Project Renamifier!</Description>
+        <DisplayName>Project Renamifier</DisplayName>
+        <Description xml:space="preserve">Safely rename projects in Visual Studio. Updates the project file, directory, namespaces, using statements, fully qualified references, and project references across your entire solution.</Description>
         <License>Resources\LICENSE</License>
         <Icon>Resources\logo.png</Icon>
         <PreviewImage>Resources\logo.png</PreviewImage>
