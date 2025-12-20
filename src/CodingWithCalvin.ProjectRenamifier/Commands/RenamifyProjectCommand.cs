@@ -2,6 +2,7 @@ using System.ComponentModel.Design;
 using System.IO;
 using System.Windows.Interop;
 using CodingWithCalvin.ProjectRenamifier.Dialogs;
+using CodingWithCalvin.ProjectRenamifier.Services;
 using EnvDTE;
 using EnvDTE80;
 
@@ -78,11 +79,13 @@ namespace CodingWithCalvin.ProjectRenamifier
             }
 
             var newName = dialog.NewProjectName;
+            var projectFilePath = project.FullName;
 
-            // TODO: Implement the actual rename operation
+            // Update RootNamespace and AssemblyName in .csproj
+            ProjectFileService.UpdateProjectFile(projectFilePath, currentName, newName);
+
+            // TODO: Implement remaining rename operations
             // See open issues for requirements:
-            // - #6: Update RootNamespace in .csproj
-            // - #7: Update AssemblyName in .csproj
             // - #8: Update namespace declarations in source files
             // - #9: Update using statements across solution
             // - #11: Solution folder support
