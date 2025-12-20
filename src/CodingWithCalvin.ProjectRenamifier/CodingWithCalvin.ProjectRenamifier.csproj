@@ -71,6 +71,7 @@
     </Compile>
     <Compile Include="ProjectRenamifierPackage.cs" />
     <Compile Include="Services\ProjectFileService.cs" />
+    <Compile Include="Services\ProjectReferenceService.cs" />
     <Compile Include="Services\SourceFileService.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
