@@ -161,6 +161,12 @@ namespace CodingWithCalvin.ProjectRenamifier
                     SourceFileService.UpdateUsingStatementsInSolution(dte.Solution, currentName, newName);
                 });
 
+                // Step 11: Update fully qualified type references across the solution
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    SourceFileService.UpdateFullyQualifiedReferencesInSolution(dte.Solution, currentName, newName);
+                });
+
                 // Mark as complete and close after a brief delay
                 progressDialog.Complete();
                 DoEvents();

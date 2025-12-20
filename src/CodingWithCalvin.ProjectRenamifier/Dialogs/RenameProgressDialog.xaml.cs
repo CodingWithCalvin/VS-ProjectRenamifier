@@ -26,7 +26,8 @@ namespace CodingWithCalvin.ProjectRenamifier.Dialogs
                 new ProgressStep("Renaming project directory"),
                 new ProgressStep("Updating project references"),
                 new ProgressStep("Re-adding project to solution"),
-                new ProgressStep("Updating using statements")
+                new ProgressStep("Updating using statements"),
+                new ProgressStep("Updating fully qualified references")
             };
 
             StepsList.ItemsSource = Steps;

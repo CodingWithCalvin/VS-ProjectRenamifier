@@ -11,6 +11,115 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
     internal static class SourceFileService
     {
         /// <summary>
+        /// Updates fully qualified type references in all .cs files across the entire solution.
+        /// For example: OldName.MyClass → NewName.MyClass
+        /// </summary>
+        /// <param name="solution">The solution to scan.</param>
+        /// <param name="oldNamespace">The old namespace to find.</param>
+        /// <param name="newNamespace">The new namespace to replace with.</param>
+        /// <returns>The number of files modified.</returns>
+        public static int UpdateFullyQualifiedReferencesInSolution(Solution solution, string oldNamespace, string newNamespace)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var modifiedCount = 0;
+
+            foreach (Project project in solution.Projects)
+            {
+                modifiedCount += UpdateFullyQualifiedReferencesInProjectTree(project, oldNamespace, newNamespace);
+            }
+
+            return modifiedCount;
+        }
+
+        /// <summary>
+        /// Recursively updates fully qualified references in a project (handles solution folders).
+        /// </summary>
+        private static int UpdateFullyQualifiedReferencesInProjectTree(Project project, string oldNamespace, string newNamespace)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (project == null)
+            {
+                return 0;
+            }
+
+            // Handle solution folders
+            if (project.Kind == EnvDTE.Constants.vsProjectKindSolutionItems)
+            {
+                var count = 0;
+                foreach (ProjectItem item in project.ProjectItems)
+                {
+                    if (item.SubProject != null)
+                    {
+                        count += UpdateFullyQualifiedReferencesInProjectTree(item.SubProject, oldNamespace, newNamespace);
+                    }
+                }
+                return count;
+            }
+
+            // Process actual project
+            if (!string.IsNullOrEmpty(project.FullName) && File.Exists(project.FullName))
+            {
+                var projectDirectory = Path.GetDirectoryName(project.FullName);
+                if (!string.IsNullOrEmpty(projectDirectory) && Directory.Exists(projectDirectory))
+                {
+                    return UpdateFullyQualifiedReferencesInDirectory(projectDirectory, oldNamespace, newNamespace);
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Updates fully qualified references in all .cs files within a directory.
+        /// </summary>
+        private static int UpdateFullyQualifiedReferencesInDirectory(string directory, string oldNamespace, string newNamespace)
+        {
+            var csFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories);
+            var modifiedCount = 0;
+
+            foreach (var filePath in csFiles)
+            {
+                if (UpdateFullyQualifiedReferencesInFile(filePath, oldNamespace, newNamespace))
+                {
+                    modifiedCount++;
+                }
+            }
+
+            return modifiedCount;
+        }
+
+        /// <summary>
+        /// Updates fully qualified type references in a single source file.
+        /// Matches patterns like OldName.MyClass, OldName.Sub.Type but not SomeOldName.Type
+        /// </summary>
+        /// <param name="filePath">Full path to the .cs file.</param>
+        /// <param name="oldNamespace">The old namespace to find.</param>
+        /// <param name="newNamespace">The new namespace to replace with.</param>
+        /// <returns>True if the file was modified, false otherwise.</returns>
+        public static bool UpdateFullyQualifiedReferencesInFile(string filePath, string oldNamespace, string newNamespace)
+        {
+            var encoding = DetectEncoding(filePath);
+            var content = File.ReadAllText(filePath, encoding);
+            var originalContent = content;
+
+            // Pattern matches OldName followed by a dot and an identifier
+            // Uses word boundary \b to avoid matching partial names like SomeOldName
+            // Matches: OldName.Class, OldName.Sub.Class, etc.
+            var pattern = $@"\b{Regex.Escape(oldNamespace)}\.";
+            content = Regex.Replace(content, pattern, $"{newNamespace}.");
+
+            if (content != originalContent)
+            {
+                File.WriteAllText(filePath, content, encoding);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Updates using statements in all .cs files across the entire solution.
         /// </summary>
         /// <param name="solution">The solution to scan.</param>
