@@ -1,11 +1,9 @@
-﻿using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell.Interop;
-using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
-using System.Windows.Forms;
-using VSLangProj;
+using System.Windows.Interop;
+using CodingWithCalvin.ProjectRenamifier.Dialogs;
+using EnvDTE;
+using EnvDTE80;
 
 namespace CodingWithCalvin.ProjectRenamifier
 {
@@ -36,140 +34,60 @@ namespace CodingWithCalvin.ProjectRenamifier
                 PackageGuids.CommandSetGuid,
                 PackageIds.RenamifyProjectCommandId
             );
-            var menuItem = new MenuCommand(RenamifyProject, menuCommandId);
+            var menuItem = new MenuCommand(Execute, menuCommandId);
             commandService.AddCommand(menuItem);
         }
 
-        private void RenamifyProject(object sender, EventArgs e)
+        private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+
             if (!(ServiceProvider.GetService(typeof(DTE)) is DTE2 dte))
             {
-                throw new ArgumentNullException(nameof(dte));
+                return;
             }
 
-            foreach (
-                UIHierarchyItem selectedItem in (Array)
-                    dte.ToolWindows.SolutionExplorer.SelectedItems
-            )
+            var selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
+            foreach (UIHierarchyItem selectedItem in selectedItems)
             {
-                switch (selectedItem.Object)
+                if (selectedItem.Object is Project project)
                 {
-                    case Project project:
-                        try
-                        {
-                            RenameProject(project, dte);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                $@"
-                                Unable to rename selected project
-                                {Environment.NewLine}
-                                {Environment.NewLine}
-                                Exception: {ex.Message}"
-                            );
-                        }
-
-                        break;
+                    RenameProject(project, dte);
                 }
             }
         }
 
-        void RenameProject(Project project, DTE2 dte)
+        private void RenameProject(Project project, DTE2 dte)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var oldProjectFileName = Path.GetFileName(project.FullName);
-            var projectFileNameNoExtension = Path.GetFileNameWithoutExtension(project.FullName);
-            var projectExtension = Path.GetExtension(oldProjectFileName);
+            var currentName = Path.GetFileNameWithoutExtension(project.FullName);
 
-            var newProjectFileName = $"{projectFileNameNoExtension}-NEW{projectExtension}";
+            var dialog = new RenameProjectDialog(currentName);
 
-            var projectPath =
-                Path.GetDirectoryName(project.FullName)
-                ?? throw new InvalidOperationException();
-            var parentDirectoryName = new DirectoryInfo(projectPath).Parent.Name;
-            var oldParentDirectory = new DirectoryInfo(projectPath).Parent.FullName;
-            
-            var grandparentDirectory = new DirectoryInfo(parentDirectoryName).Parent.FullName;
-            var newParentDirectory = Path.Combine(grandparentDirectory, $"{parentDirectoryName}-NEW");
-                
-            // hold onto all projects that reference this project
-            var referencingProjects = new List<Project>();
-            foreach (Project p in dte.Solution.Projects)
+            // Set the owner to the VS main window for proper modal behavior
+            var hwnd = new IntPtr(dte.MainWindow.HWnd);
+            var helper = new WindowInteropHelper(dialog)
             {
-                if(p.Object is VSProject referencingVSProject)
-                {
-                    foreach(Reference reference in referencingVSProject.References)
-                    {
-                        if(reference.SourceProject != null && reference.SourceProject.UniqueName == project.UniqueName)
-                        {
-                            referencingProjects.Add(p);
-                        }
-                    } 
-                }
+                Owner = hwnd
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
             }
 
-            // hold onto all projects that this project references
-            var referencedProjects = new List<Project>();
-            
-                if (project.Object is VSProject referencedVSProject)
-                {
-                    foreach (Reference reference in referencedVSProject.References)
-                    {
-                        if (reference.SourceProject != null)
-                        {
-                            referencedProjects.Add(reference.SourceProject);
-                        }
-                    }
-                }
-            
-            // unload project, then do the work
-            dte.Solution.Remove(project);
+            var newName = dialog.NewProjectName;
 
-            //rename parent directory, if necessary
-            if (parentDirectoryName.Equals(projectFileNameNoExtension))
-            {
-                Directory.Move(oldParentDirectory, newParentDirectory);
-            }
-
-            // rename project
-            File.Move(oldProjectFileName, newProjectFileName);
-
-            // add new project back to solution
-            dte.Solution.AddFromFile(newProjectFileName, true);
-
-            // need handle to new project now that its back 
-            Project newProjectReference = null;
-            foreach (Project p in dte.Solution.Projects)
-            {
-                if(p.UniqueName == newProjectFileName)
-                {
-                    newProjectReference = p;
-                    break;
-                }
-            }
-            
-            // fix projects that reference the old project to reference the new one
-            foreach (var referencingProject in referencingProjects)
-            {
-                if(referencingProject.Object is VSProject vsProject)
-                {
-                    vsProject.References.AddProject(newProjectReference);
-                }
-            }
-
-            // fix this project's references
-            foreach (var referencedProject in referencedProjects)
-            {
-                if(newProjectReference.Object is VSProject vsProject2)
-                {
-                    vsProject2.References.AddProject(referencedProject);
-                }
-            }
-                        
-            // sync new namespace?
+            // TODO: Implement the actual rename operation
+            // See open issues for requirements:
+            // - #6: Update RootNamespace in .csproj
+            // - #7: Update AssemblyName in .csproj
+            // - #8: Update namespace declarations in source files
+            // - #9: Update using statements across solution
+            // - #11: Solution folder support
+            // - #12: Progress indication
+            // - #13: Error handling and rollback
         }
     }
 }
