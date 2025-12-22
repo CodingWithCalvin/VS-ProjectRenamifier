@@ -8,7 +8,13 @@ permissions:
   actions: read
 
 jobs:
+  changelog:
+    name: Generate Changelog
+    uses: CodingWithCalvin/.github/.github/workflows/generate-changelog.yml@main
+    secrets: inherit
+
   publish:
+    needs: changelog
     runs-on: windows-latest
     outputs:
       version: ${{ steps.artifact_manifest.outputs.version }}
@@ -33,7 +39,7 @@ jobs:
         uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
-          generateReleaseNotes: true
+          body: ${{ needs.changelog.outputs.changelog }}
           makeLatest: true
           commit: ${{ steps.artifact_manifest.outputs.sha }}
           tag: ${{ steps.artifact_manifest.outputs.version }}
