@@ -1,0 +1,11 @@
+name: Update Contributors
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  contributors:
+    uses: CodingWithCalvin/.github/.github/workflows/contributors.yml@main
+    secrets: inherit
