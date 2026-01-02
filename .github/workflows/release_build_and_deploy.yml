@@ -27,7 +27,7 @@ jobs:
         extension-source-file: 'src/CodingWithCalvin.ProjectRenamifier/source.extension.cs'
 
     - name: 2. Restoring Packages
-      run: nuget restore src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.slnx
+      run: nuget restore src/CodingWithCalvin.ProjectRenamifier.slnx
 
     - name: 3. Building Project
       run: msbuild 'src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj' /p:configuration='Release' /p:platform='x64' /p:DeployExtension=False
