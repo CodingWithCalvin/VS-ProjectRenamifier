@@ -6,5 +6,5 @@
     <Platform Name="arm64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="CodingWithCalvin.ProjectRenamifier.csproj" />
+  <Project Path="CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj" />
 </Solution>
