@@ -26,7 +26,7 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          workflow: release_build_and_deploy.yml
+          workflow: build.yml
           workflow_conclusion: success
 
       - name: 2. Parse Artifact Manifest
