@@ -55,4 +55,5 @@ For cloning and building this project yourself, make sure to install the [Extens
 ## Contributors
 
 <!-- readme: contributors -start -->
+[![CalvinAllen](https://avatars.githubusercontent.com/u/41448698?v=4&s=64)](https://github.com/CalvinAllen) 
 <!-- readme: contributors -end -->
