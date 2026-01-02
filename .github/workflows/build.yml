@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: 1. Generate Version
+      id: version
+      run: |
+        $year = (Get-Date).Year
+        $month = (Get-Date).Month
+        $day = (Get-Date).Day
+        $version = "$year.$month.$day.${{ github.run_number }}"
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+
+    - name: 2. Build Project
+      run: dotnet build src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj -c Release -p:SetVsixVersion=${{ steps.version.outputs.version }}
+
+    - name: 3. Create Information File
+      uses: jsdaniell/create-json@v1.2.3
+      with:
+        name: 'src/CodingWithCalvin.ProjectRenamifier/bin/Release/CodingWithCalvin.ProjectRenamifier.info'
+        json: '{"sha":"${{ github.sha }}", "version":"${{ steps.version.outputs.version }}"}'
+
+    - name: 4. Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: |
+          src/CodingWithCalvin.ProjectRenamifier/bin/Release/CodingWithCalvin.ProjectRenamifier.info
+          src/CodingWithCalvin.ProjectRenamifier/bin/Release/CodingWithCalvin.ProjectRenamifier.vsix
