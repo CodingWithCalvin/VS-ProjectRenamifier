@@ -13,42 +13,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 5. **Branch naming** - Use format: `type/scope/short-description` (e.g., `feat/ui/settings-dialog`)
 6. **Working an issue** - Always create a new branch from an updated main branch
 7. **Check branch status before pushing** - Verify the remote tracking branch still exists. If a PR was merged/deleted, create a new branch from main instead
-8. **WPF for all UI** - All UI must be implemented using WPF (XAML/C#). No web-based technologies (HTML, JavaScript, WebView)
-
-### VSIX Development Rules
-
-**Solution & Project Structure:**
-- SLNX solution files only (no legacy .sln)
-- Solution naming: `CodingWithCalvin.<ProjectFolder>`
-- Primary project naming: `CodingWithCalvin.<ProjectFolder>`
-- Additional project naming: `CodingWithCalvin.<ProjectFolder>.<Classifier>`
-
-**Build Configuration:**
-- Configurations: Debug and Release
-- Platform: AnyCPU
-- Build Tools: Latest 17.* release
-- VSSDK: Latest 17.* release
-
-**Target Frameworks:**
-- Main VSIX project: .NET Framework 4.8
-- Library projects: .NET Standard 2.0 (may use SDK-style project format)
-
-**VSIX Manifest:**
-- Version range: `[17.0,19.0)` — supports VS 2022 through VS 2026
-- Architectures: AMD64 and ARM64
-- Prerequisites: List Community edition only (captures Pro/Enterprise)
-
-**CI/CD:**
-- Build workflow: Automated build on push/PR
-- Publish workflow: Automated marketplace publishing
-- Marketplace config: `publish.manifest.json` for automated publishing
-
-**Development Environment:**
-- Required extension: Extensibility Essentials 2022
-- Helper library: VsixCommunity Toolkit
-
-**Documentation:**
-- README should be exciting and use emojis
+8. **Microsoft coding guidelines** - Follow [Microsoft C# coding conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) and [.NET library design guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/)
+9. **WPF for all UI** - All UI must be implemented using WPF (XAML/C#). No web-based technologies (HTML, JavaScript, WebView)
 
 ---
 
@@ -71,6 +37,43 @@ gh issue close <number>
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
 | `test` | Adding or updating tests |
 | `chore` | Maintenance tasks |
+| `perf` | Performance improvement |
+| `ci` | CI/CD changes |
+
+### VSIX Development Rules
+
+**Solution & Project Structure:**
+- SLNX solution files only (no legacy .sln)
+- Solution naming: `CodingWithCalvin.<ProjectFolder>`
+- Primary project naming: `CodingWithCalvin.<ProjectFolder>`
+- Additional project naming: `CodingWithCalvin.<ProjectFolder>.<Classifier>`
+
+**Build Configuration:**
+- Configurations: Debug and Release
+- Platform: AnyCPU (or x64 where required)
+- Build Tools: Latest 17.* release
+- VSSDK: Latest 17.* release
+
+**Target Frameworks:**
+- Main VSIX project: .NET Framework 4.8
+- Library projects: .NET Standard 2.0 (may use SDK-style project format)
+
+**VSIX Manifest:**
+- Version range: `[17.0,19.0)` — supports VS 2022 through VS 2026
+- Architectures: AMD64 and ARM64
+- Prerequisites: List Community edition only (captures Pro/Enterprise)
+
+**CI/CD:**
+- Build workflow: Automated build on push/PR
+- Publish workflow: Automated marketplace publishing
+- Marketplace config: `publish.manifest.json` for automated publishing
+
+**Development Environment:**
+- Required extension: Extensibility Essentials 2022
+- Helper library: Community.VisualStudio.Toolkit (where applicable)
+
+**Documentation:**
+- README should be exciting and use emojis
 
 ---
 
@@ -83,10 +86,11 @@ This is a Visual Studio 2022 extension (VSIX) called "Project Renamifier" that a
 ## Build Commands
 
 ```bash
-# Build the solution (from repo root)
-msbuild src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.slnx
+# Build the solution
+dotnet build src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj
 
-# Or open in Visual Studio and build (F5 to debug launches experimental VS instance)
+# Build Release
+dotnet build src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj -c Release
 ```
 
 ## Development Setup
@@ -110,18 +114,9 @@ msbuild src/CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifie
 - Commands registered via VSCT files and OleMenuCommandService
 - **Always use WPF for user interface** (dialogs, windows, etc.)
 
-## Coding Standards
+## CI/CD
 
-Follow Microsoft's official guidelines:
+GitHub Actions workflows in `.github/workflows/`:
 
-- [C# Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- [.NET Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/)
-- [Framework Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/general-naming-conventions)
-
-Key points:
-- Use PascalCase for public members, types, namespaces, and methods
-- Use camelCase for private fields (prefix with `_` e.g., `_fieldName`)
-- Use `var` when the type is obvious from the right side of the assignment
-- Use meaningful, descriptive names
-- Prefer `async`/`await` for asynchronous operations
-- Use `ThreadHelper.ThrowIfNotOnUIThread()` when accessing VS services that require the UI thread
+- **build.yml** - Triggered on push to main or PR. Builds and uploads VSIX artifact.
+- **publish.yml** - Manual trigger to publish to VS Marketplace.
