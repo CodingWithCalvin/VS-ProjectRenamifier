@@ -8,60 +8,11 @@ permissions:
   actions: read
 
 jobs:
-  changelog:
-    name: Generate Changelog
-    uses: CodingWithCalvin/.github/.github/workflows/generate-changelog.yml@main
-    secrets: inherit
-
   publish:
-    needs: changelog
-    runs-on: windows-latest
-    outputs:
-      version: ${{ steps.artifact_manifest.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: 1. Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-
-      - name: 2. Parse Artifact Manifest
-        id: artifact_manifest
-        uses: ActionsTools/read-json-action@main
-        with:
-          file_path: ./artifact/CodingWithCalvin.ProjectRenamifier.info
-
-      - name: 3. Create Tag & Release
-        uses: ncipollo/release-action@v1.14.0
-        with:
-          artifacts: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
-          body: ${{ needs.changelog.outputs.changelog }}
-          makeLatest: true
-          commit: ${{ steps.artifact_manifest.outputs.sha }}
-          tag: ${{ steps.artifact_manifest.outputs.version }}
-
-      - name: 4. Publish Release to Marketplace
-        if: success()
-        uses: CodingWithCalvin/GHA-VSMarketplacePublisher@v1
-        with:
-          marketplace-pat: ${{ secrets.VS_PAT }}
-          publish-manifest-path: ./resources/extension.manifest.json
-          vsix-path: ./artifact/CodingWithCalvin.ProjectRenamifier.vsix
-
-  notify:
-    needs: publish
-    uses: CodingWithCalvin/.github/.github/workflows/bluesky-post.yml@main
+    uses: CodingWithCalvin/.github/.github/workflows/vsix-publish.yml@main
     with:
-      post_text: |
-        🚀 Project Renamifier v${{ needs.publish.outputs.version }} for #VisualStudio has been released!
-
-        [Check out the release notes here!](https://github.com/${{ github.repository }}/releases/tag/${{ needs.publish.outputs.version }})
-
-        Marketplace: https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier
-    secrets:
-      BLUESKY_USERNAME: ${{ secrets.BLUESKY_USERNAME }}
-      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+      extension-name: ProjectRenamifier
+      display-name: 'Project Renamifier'
+      marketplace-id: CodingWithCalvin.VS-ProjectRenamifier
+      description: 'Safely rename projects in Visual Studio with namespace and reference updates'
+    secrets: inherit
