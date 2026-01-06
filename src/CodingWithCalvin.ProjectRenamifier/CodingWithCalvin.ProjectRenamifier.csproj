@@ -1,4 +1,4 @@
-<Project Sdk="CodingWithCalvin.VsixSdk/0.3.0">
+﻿<Project Sdk="CodingWithCalvin.VsixSdk/0.3.0">
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
@@ -9,11 +9,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DeployExtension>True</DeployExtension>
-  </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="CodingWithCalvin.Otel4Vsix" Version="0.2.2" />
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" />
   </ItemGroup>
 
