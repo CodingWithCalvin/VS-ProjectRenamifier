@@ -70,9 +70,7 @@ namespace CodingWithCalvin.ProjectRenamifier
             using var activity = VsixTelemetry.StartCommandActivity("ProjectRenamifier.RenameProject");
 
             var currentName = Path.GetFileNameWithoutExtension(project.FullName);
-            activity?.SetTag("project.current_name", currentName);
-
-            var dialog = new RenameProjectDialog(currentName);
+                        var dialog = new RenameProjectDialog(currentName);
 
             // Set the owner to the VS main window for proper modal behavior
             var helper = new WindowInteropHelper(dialog)
@@ -82,7 +80,7 @@ namespace CodingWithCalvin.ProjectRenamifier
 
             if (dialog.ShowDialog() != true)
             {
-                VsixTelemetry.LogInformation("Rename cancelled by user for project {ProjectName}", currentName);
+                VsixTelemetry.LogInformation("Rename cancelled by user");
                 return;
             }
 
@@ -90,8 +88,7 @@ namespace CodingWithCalvin.ProjectRenamifier
             var projectFilePath = project.FullName;
             var originalProjectFilePath = projectFilePath;
 
-            activity?.SetTag("project.new_name", newName);
-            VsixTelemetry.LogInformation("Renaming project from {OldName} to {NewName}", currentName, newName);
+                        VsixTelemetry.LogInformation("Renaming project");
 
             // Show progress dialog
             var progressDialog = new RenameProgressDialog(currentName);
@@ -186,7 +183,7 @@ namespace CodingWithCalvin.ProjectRenamifier
 
                 activity?.SetTag("rename.success", true);
                 activity?.SetTag("rename.steps_completed", stepIndex);
-                VsixTelemetry.LogInformation("Successfully renamed project from {OldName} to {NewName}", currentName, newName);
+                VsixTelemetry.LogInformation("Successfully renamed project");
             }
             catch (Exception ex)
             {
@@ -201,8 +198,6 @@ namespace CodingWithCalvin.ProjectRenamifier
                 VsixTelemetry.TrackException(ex, new Dictionary<string, object>
                 {
                     { "operation.name", "RenameProject" },
-                    { "project.old_name", currentName },
-                    { "project.new_name", newName },
                     { "step.index", stepIndex }
                 });
 
@@ -215,7 +210,7 @@ namespace CodingWithCalvin.ProjectRenamifier
                         var currentProjectPath = File.Exists(projectFilePath) ? projectFilePath : originalProjectFilePath;
                         if (File.Exists(currentProjectPath))
                         {                            SolutionFolderService.AddProjectToSolution(dte.Solution, currentProjectPath, parentSolutionFolder);
-                            VsixTelemetry.LogInformation("Rollback: Re-added project at {ProjectPath}", currentProjectPath);
+                            VsixTelemetry.LogInformation("Rollback: Re-added project");
                         }
                     }
                     catch (Exception rollbackEx)
