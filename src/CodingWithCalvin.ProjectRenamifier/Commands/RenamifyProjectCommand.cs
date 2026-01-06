@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using CodingWithCalvin.ProjectRenamifier.Dialogs;
 using CodingWithCalvin.ProjectRenamifier.Services;
+using CodingWithCalvin.Otel4Vsix;
 using EnvDTE;
 using EnvDTE80;
 
@@ -44,6 +46,8 @@ namespace CodingWithCalvin.ProjectRenamifier
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
+            using var activity = VsixTelemetry.StartCommandActivity("ProjectRenamifier.Execute");
+
             if (!(ServiceProvider.GetService(typeof(DTE)) is DTE2 dte))
             {
                 return;
@@ -63,9 +67,10 @@ namespace CodingWithCalvin.ProjectRenamifier
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var currentName = Path.GetFileNameWithoutExtension(project.FullName);
+            using var activity = VsixTelemetry.StartCommandActivity("ProjectRenamifier.RenameProject");
 
-            var dialog = new RenameProjectDialog(currentName);
+            var currentName = Path.GetFileNameWithoutExtension(project.FullName);
+                        var dialog = new RenameProjectDialog(currentName);
 
             // Set the owner to the VS main window for proper modal behavior
             var helper = new WindowInteropHelper(dialog)
@@ -75,12 +80,15 @@ namespace CodingWithCalvin.ProjectRenamifier
 
             if (dialog.ShowDialog() != true)
             {
+                VsixTelemetry.LogInformation("Rename cancelled by user");
                 return;
             }
 
             var newName = dialog.NewProjectName;
             var projectFilePath = project.FullName;
             var originalProjectFilePath = projectFilePath;
+
+                        VsixTelemetry.LogInformation("Renaming project");
 
             // Show progress dialog
             var progressDialog = new RenameProgressDialog(currentName);
@@ -93,7 +101,7 @@ namespace CodingWithCalvin.ProjectRenamifier
             var stepIndex = 0;
             var projectRemovedFromSolution = false;
             var projectReaddedToSolution = false;
-            System.Collections.Generic.List<string> referencingProjects = null;
+            List<string> referencingProjects = null;
             Project parentSolutionFolder = null;
 
             try
@@ -172,12 +180,26 @@ namespace CodingWithCalvin.ProjectRenamifier
                 DoEvents();
                 System.Threading.Thread.Sleep(500);
                 progressDialog.Close();
+
+                activity?.SetTag("rename.success", true);
+                activity?.SetTag("rename.steps_completed", stepIndex);
+                VsixTelemetry.LogInformation("Successfully renamed project");
             }
             catch (Exception ex)
             {
                 // Mark the current step as failed
                 progressDialog.FailStep(stepIndex, ex.Message);
                 DoEvents();
+
+                activity?.RecordError(ex);
+                activity?.SetTag("rename.success", false);
+                activity?.SetTag("rename.failed_step", stepIndex);
+
+                VsixTelemetry.TrackException(ex, new Dictionary<string, object>
+                {
+                    { "operation.name", "RenameProject" },
+                    { "step.index", stepIndex }
+                });
 
                 // Attempt rollback if project was removed but not re-added
                 if (projectRemovedFromSolution && !projectReaddedToSolution)
@@ -187,13 +209,16 @@ namespace CodingWithCalvin.ProjectRenamifier
                         // Try to re-add the project at its current location
                         var currentProjectPath = File.Exists(projectFilePath) ? projectFilePath : originalProjectFilePath;
                         if (File.Exists(currentProjectPath))
-                        {
-                            SolutionFolderService.AddProjectToSolution(dte.Solution, currentProjectPath, parentSolutionFolder);
+                        {                            SolutionFolderService.AddProjectToSolution(dte.Solution, currentProjectPath, parentSolutionFolder);
+                            VsixTelemetry.LogInformation("Rollback: Re-added project");
                         }
                     }
-                    catch
+                    catch (Exception rollbackEx)
                     {
-                        // Rollback failed, nothing more we can do
+                        VsixTelemetry.TrackException(rollbackEx, new Dictionary<string, object>
+                        {
+                            { "operation.name", "RenameProject.Rollback" }
+                        });
                     }
                 }
 
