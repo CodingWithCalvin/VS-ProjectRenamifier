@@ -1,10 +1,8 @@
 <Solution>
   <Configurations>
-    <BuildType Name="Debug" />
-    <BuildType Name="Release" />
-    <Platform Name="Any CPU" />
-    <Platform Name="arm64" />
-    <Platform Name="x86" />
+    <Configuration Name="Debug" />
+    <Configuration Name="Release" />
+    <Platform Name="AnyCPU" />
   </Configurations>
   <Project Path="CodingWithCalvin.ProjectRenamifier/CodingWithCalvin.ProjectRenamifier.csproj" />
 </Solution>
