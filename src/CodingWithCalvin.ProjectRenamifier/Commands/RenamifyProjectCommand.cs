@@ -46,20 +46,91 @@ namespace CodingWithCalvin.ProjectRenamifier
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            using var activity = VsixTelemetry.StartCommandActivity("ProjectRenamifier.Execute");
-
-            if (!(ServiceProvider.GetService(typeof(DTE)) is DTE2 dte))
+            IDisposable activity = null;
+            try
             {
-                return;
+                activity = VsixTelemetry.StartCommandActivity("ProjectRenamifier.Execute");
+            }
+            catch (Exception ex)
+            {
+                // Telemetry initialization failed - log but continue
+                System.Diagnostics.Debug.WriteLine($"Telemetry initialization failed: {ex.Message}");
             }
 
-            var selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
-            foreach (UIHierarchyItem selectedItem in selectedItems)
+            try
             {
-                if (selectedItem.Object is Project project)
+                if (!(ServiceProvider.GetService(typeof(DTE)) is DTE2 dte))
                 {
-                    RenameProject(project, dte);
+                    System.Windows.MessageBox.Show(
+                        "Unable to access Visual Studio automation services (DTE).\n\n" +
+                        "Please try again or restart Visual Studio.",
+                        "Project Renamifier",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
                 }
+
+                Array selectedItems;
+                try
+                {
+                    selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Unable to access Solution Explorer selection.\n\n{ex.Message}",
+                        "Project Renamifier",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (selectedItems == null || selectedItems.Length == 0)
+                {
+                    System.Windows.MessageBox.Show(
+                        "No project is selected.\n\nPlease select a project in Solution Explorer and try again.",
+                        "Project Renamifier",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                    return;
+                }
+
+                var projectFound = false;
+                foreach (UIHierarchyItem selectedItem in selectedItems)
+                {
+                    if (selectedItem.Object is Project project)
+                    {
+                        projectFound = true;
+                        RenameProject(project, dte);
+                    }
+                }
+
+                if (!projectFound)
+                {
+                    System.Windows.MessageBox.Show(
+                        "The selected item is not a project.\n\nPlease select a project (not a solution folder or file) and try again.",
+                        "Project Renamifier",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                VsixTelemetry.TrackException(ex, new Dictionary<string, object>
+                {
+                    { "operation.name", "Execute" }
+                });
+
+                System.Windows.MessageBox.Show(
+                    $"An unexpected error occurred:\n\n{ex.Message}\n\n" +
+                    "Please report this issue at:\nhttps://github.com/CodingWithCalvin/VS-ProjectRenamifier/issues",
+                    "Project Renamifier - Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
 
