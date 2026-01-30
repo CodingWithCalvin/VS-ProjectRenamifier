@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodingWithCalvin.Otel4Vsix" Version="0.2.2" />
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.32112.339" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.*" PrivateAssets="all" />
   </ItemGroup>
 
