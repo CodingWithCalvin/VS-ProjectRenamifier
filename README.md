@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/logo.png" alt="Project Renamifier Logo" width="256"/>
 
-# 🔄 Project Renamifier
+---
 
 [![License](https://img.shields.io/github/license/CodingWithCalvin/VS-ProjectRenamifier?style=for-the-badge)](https://github.com/CodingWithCalvin/VS-ProjectRenamifier/blob/main/LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/CodingWithCalvin/VS-ProjectRenamifier/build.yml?style=for-the-badge)](https://github.com/CodingWithCalvin/VS-ProjectRenamifier/actions/workflows/build.yml)
