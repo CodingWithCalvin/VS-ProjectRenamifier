@@ -4,6 +4,7 @@
         <Identity Id="VS-ProjectRenamifier" Version="1.0" Language="en-US" Publisher="Coding With Calvin" />
         <DisplayName>Project Renamifier</DisplayName>
         <Description xml:space="preserve">Safely rename projects in Visual Studio. Updates the project file, directory, namespaces, using statements, fully qualified references, and project references across your entire solution.</Description>
+        <MoreInfo>https://github.com/CodingWithCalvin/VS-ProjectRenamifier</MoreInfo>
         <License>Resources\LICENSE</License>
         <Icon>Resources\logo.png</Icon>
         <PreviewImage>Resources\logo.png</PreviewImage>
