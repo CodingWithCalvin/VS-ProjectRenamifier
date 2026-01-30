@@ -2,10 +2,12 @@ name: Update Contributors
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
   contributors:
     uses: CodingWithCalvin/.github/.github/workflows/contributors.yml@main
+    with:
+      output-format: html
     secrets: inherit
