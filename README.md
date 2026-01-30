@@ -36,7 +36,7 @@
 
 Tired of the tedious, error-prone process of renaming a project in Visual Studio? Say goodbye to manual find-and-replace across dozens of files! **Project Renamifier** handles everything automatically - one click, one dialog, done!
 
-## Features
+## ✨ Features
 
 When you rename a project, this extension handles **all** of the following automatically:
 
@@ -53,13 +53,13 @@ When you rename a project, this extension handles **all** of the following autom
 
 The extension shows a progress dialog with step-by-step status as it performs the rename operation, and includes error handling with rollback support if something goes wrong.
 
-## Screenshots
+## 📸 Screenshots
 
 ![Rename Dialog](https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/rename-dialog.png)
 
 ![Progress Dialog](https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/progress-dialog.png)
 
-## Installation
+## 🛠️ Installation
 
 ### Visual Studio Marketplace
 
@@ -72,25 +72,25 @@ The extension shows a progress dialog with step-by-step status as it performs th
 
 Download the latest `.vsix` from the [Releases](https://github.com/CodingWithCalvin/VS-ProjectRenamifier/releases) page and double-click to install.
 
-## Usage
+## 🚀 Usage
 
 1. Right-click on a project in Solution Explorer
 2. Select **Renamify Project**
 3. Enter the new project name in the dialog
 4. Click **Rename** and watch the magic happen!
 
-## Supported Versions
+## 💻 Supported Versions
 
 | Visual Studio | Architectures |
 |---------------|---------------|
 | Visual Studio 2022 (17.x) | x64 (amd64), ARM64 |
 | Visual Studio 2026 (18.x) | x64 (amd64), ARM64 |
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Whether it's bug reports, feature requests, or pull requests - all feedback helps make this extension better.
 
-### Development Setup
+### 🔧 Development Setup
 
 1. Clone the repository
 2. Open the solution in Visual Studio 2022 or 2026
@@ -98,13 +98,13 @@ Contributions are welcome! Whether it's bug reports, feature requests, or pull r
 4. Install the [Extensibility Essentials 2022](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ExtensibilityEssentials2022) extension
 5. Press F5 to launch the experimental instance
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## Contributors
+## 👥 Contributors
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->
