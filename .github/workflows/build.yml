@@ -11,10 +11,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - '*.slnx'
-      - '.github/workflows/build.yml'
 
 jobs:
   build:

@@ -1,4 +1,4 @@
-name: Lint Commit Messages
+name: Lint PR Title
 
 on:
   pull_request:
@@ -31,29 +31,3 @@ jobs:
         run: |
           echo "Validating PR title: $PR_TITLE"
           echo "$PR_TITLE" | npx commitlint --verbose
-
-  commitlint:
-    name: Lint Commit Messages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install commitlint
-        run: |
-          npm install --save-dev @commitlint/cli@18.4.3 @commitlint/config-conventional@18.4.3
-
-      - name: Validate PR commits
-        run: |
-          # Get the base branch (usually main)
-          BASE_SHA=$(git merge-base origin/${{ github.base_ref }} HEAD)
-
-          # Lint all commits in the PR
-          npx commitlint --from $BASE_SHA --to HEAD --verbose
