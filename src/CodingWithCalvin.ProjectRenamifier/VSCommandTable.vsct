@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <Extern href="stdidcmd.h"/>
@@ -7,7 +7,7 @@
   <Commands package="ProjectRenamifier">
 	  <Buttons>
 		  <Button guid="CommandSetGuid" id="RenamifyProjectCommandId" type="Button">
-			  <Icon guid="IconGuid" id="FolderIcon" />
+			  <Icon guid="IconGuid" id="LightningBoltIcon" />
 			  <Strings>
 				  <ButtonText>Renamify Project</ButtonText>
 			  </Strings>
@@ -15,7 +15,7 @@
 	  </Buttons>
 
 	  <Bitmaps>
-		  <Bitmap guid="IconGuid" usedList="FolderIcon" href="../../resources/folder-icon.png" />
+		  <Bitmap guid="IconGuid" usedList="LightningBoltIcon" href="../../resources/icon.png" />
 	  </Bitmaps>
   </Commands>
 
@@ -33,7 +33,7 @@
 	  </GuidSymbol>
 
 	  <GuidSymbol name="IconGuid" value="{6a050d5f-fb67-4d45-b6fc-f6f2612aa8ad}">
-		  <IDSymbol name="FolderIcon" value="1" />
+		  <IDSymbol name="LightningBoltIcon" value="1" />
 	  </GuidSymbol>
   </Symbols>
 </CommandTable>

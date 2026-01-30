@@ -1,4 +1,4 @@
-﻿global using Microsoft.VisualStudio.Shell;
+global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
 using System.Runtime.InteropServices;
@@ -8,9 +8,9 @@ using CodingWithCalvin.Otel4Vsix;
 namespace CodingWithCalvin.ProjectRenamifier
 {
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
+    [InstalledProductRegistration(VsixInfo.DisplayName, VsixInfo.Description, VsixInfo.Version)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(PackageGuids.ProjectRenamifierString)]
+    [Guid(VSCommandTableVsct.ProjectRenamifierString)]
     public sealed class ProjectRenamifierPackage : AsyncPackage
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)

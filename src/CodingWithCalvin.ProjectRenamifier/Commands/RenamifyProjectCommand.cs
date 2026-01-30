@@ -35,8 +35,8 @@ namespace CodingWithCalvin.ProjectRenamifier
             }
 
             var menuCommandId = new CommandID(
-                PackageGuids.CommandSetGuid,
-                PackageIds.RenamifyProjectCommandId
+                VSCommandTableVsct.CommandSetGuid.Guid,
+                VSCommandTableVsct.CommandSetGuid.RenamifyProjectCommandId
             );
             var menuItem = new MenuCommand(Execute, menuCommandId);
             commandService.AddCommand(menuItem);
