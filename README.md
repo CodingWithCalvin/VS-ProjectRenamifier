@@ -1,13 +1,22 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/logo.png" alt="Project Renamifier Logo" width="256"/>
+
 # 🔄 Project Renamifier
 
 [![License](https://img.shields.io/github/license/CodingWithCalvin/VS-ProjectRenamifier?style=for-the-badge)](https://github.com/CodingWithCalvin/VS-ProjectRenamifier/blob/main/LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/CodingWithCalvin/VS-ProjectRenamifier/build.yml?style=for-the-badge)](https://github.com/CodingWithCalvin/VS-ProjectRenamifier/actions/workflows/build.yml)
+
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/CodingWithCalvin.VS-ProjectRenamifier?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier)
 [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/CodingWithCalvin.VS-ProjectRenamifier?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier)
+[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Marketplace-Install-blue?style=for-the-badge&logo=visualstudio)](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier)
 [![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/CodingWithCalvin.VS-ProjectRenamifier?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier)
 
-> 🚀 **Rename projects the way it should have always worked!**
+🚀 **Rename projects the way it should have always worked!**
 
 Tired of the tedious, error-prone process of renaming a project in Visual Studio? Say goodbye to manual find-and-replace across dozens of files! **Project Renamifier** handles everything automatically — one click, one dialog, done! ✨
+
+</div>
 
 ## ✨ Features
 
@@ -26,11 +35,17 @@ When you rename a project, this extension handles **all** of the following autom
 
 The extension shows a progress dialog with step-by-step status as it performs the rename operation, and includes error handling with rollback support if something goes wrong. 🛡️
 
+## 📸 Screenshots
+
+![Rename Dialog](https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/rename-dialog.png)
+
+![Progress Dialog](https://raw.githubusercontent.com/CodingWithCalvin/VS-ProjectRenamifier/main/resources/progress-dialog.png)
+
 ## 📥 Installation
 
 ### Visual Studio Marketplace (Recommended)
 
-Install directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier) — just one click! 🎯
+[![Install from VS Marketplace](https://img.shields.io/badge/Install%20from-VS%20Marketplace-purple?style=for-the-badge&logo=visualstudio)](https://marketplace.visualstudio.com/items?itemName=CodingWithCalvin.VS-ProjectRenamifier)
 
 ### Manual Installation
 
@@ -40,7 +55,7 @@ Install directly from the [Visual Studio Marketplace](https://marketplace.visual
 ## 🎮 Usage
 
 1. 🖱️ Right-click on a project in Solution Explorer
-2. 📋 Select **Rename Project (Renamify)**
+2. 📋 Select **Renamify Project**
 3. ✏️ Enter the new project name in the dialog
 4. 🚀 Click **Rename** and watch the magic happen!
 
@@ -50,6 +65,10 @@ Install directly from the [Visual Studio Marketplace](https://marketplace.visual
 |---------------|---------------|
 | 🟢 Visual Studio 2022 (17.x) | x64 (amd64), ARM64 |
 | 🟢 Visual Studio 2026 (18.x) | x64 (amd64), ARM64 |
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ## 🤝 Contributing
 
