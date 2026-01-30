@@ -10,6 +10,6 @@
   },
   "overview": "../README.md",
   "publisher": "CodingWithCalvin",
-  "qna": false,
+  "qna": true,
   "repo": "https://github.com/CodingWithCalvin/VS-ProjectRenamifier"
 }
