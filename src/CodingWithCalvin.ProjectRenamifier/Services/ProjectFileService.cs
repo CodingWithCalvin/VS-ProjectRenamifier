@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace CodingWithCalvin.ProjectRenamifier.Services
@@ -24,6 +26,45 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
             File.Move(projectFilePath, newFilePath);
 
             return newFilePath;
+        }
+
+        /// <summary>
+        /// Renames sibling files that share the project file name as a prefix.
+        /// For example, renaming Foo.csproj also renames Foo.csproj.user, Foo.csproj.filters, etc.
+        /// </summary>
+        /// <param name="projectFilePath">Full path to the already-renamed project file.</param>
+        /// <param name="oldName">The old project name (without extension).</param>
+        /// <returns>A list of the old file paths that were renamed.</returns>
+        public static IReadOnlyList<string> RenameSiblingFiles(string projectFilePath, string oldName)
+        {
+            var directory = Path.GetDirectoryName(projectFilePath);
+            var extension = Path.GetExtension(projectFilePath);
+            var newName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var oldProjectFileName = oldName + extension;
+            var newProjectFileName = newName + extension;
+
+            var siblingFiles = Directory.GetFiles(directory)
+                .Where(f =>
+                {
+                    var fileName = Path.GetFileName(f);
+                    return fileName.StartsWith(oldProjectFileName + ".", StringComparison.OrdinalIgnoreCase);
+                })
+                .ToList();
+
+            var renamed = new List<string>();
+
+            foreach (var filePath in siblingFiles)
+            {
+                var fileName = Path.GetFileName(filePath);
+                var suffix = fileName.Substring(oldProjectFileName.Length);
+                var newFileName = newProjectFileName + suffix;
+                var newFilePath = Path.Combine(directory, newFileName);
+
+                File.Move(filePath, newFilePath);
+                renamed.Add(filePath);
+            }
+
+            return renamed;
         }
 
         /// <summary>

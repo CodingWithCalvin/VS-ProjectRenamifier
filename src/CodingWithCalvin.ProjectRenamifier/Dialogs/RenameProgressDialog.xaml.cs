@@ -23,6 +23,7 @@ namespace CodingWithCalvin.ProjectRenamifier.Dialogs
                 new ProgressStep("Updating project file"),
                 new ProgressStep("Updating namespace declarations"),
                 new ProgressStep("Renaming project file"),
+                new ProgressStep("Renaming sibling files"),
                 new ProgressStep("Renaming project directory"),
                 new ProgressStep("Updating project references"),
                 new ProgressStep("Re-adding project to solution"),
