@@ -215,32 +215,38 @@ namespace CodingWithCalvin.ProjectRenamifier
                     return ProjectFileService.RenameProjectFile(projectFilePath, newName);
                 }, out projectFilePath);
 
-                // Step 7: Rename parent directory if it matches the old project name
+                // Step 7: Rename sibling files (e.g., .csproj.user, .vcxproj.filters)
+                ExecuteStep(progressDialog, stepIndex++, () =>
+                {
+                    ProjectFileService.RenameSiblingFiles(projectFilePath, currentName);
+                });
+
+                // Step 8: Rename parent directory if it matches the old project name
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
                     return ProjectFileService.RenameParentDirectoryIfMatches(projectFilePath, currentName, newName);
                 }, out projectFilePath);
 
-                // Step 8: Update references in projects that referenced this project
+                // Step 9: Update references in projects that referenced this project
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
                     ProjectReferenceService.UpdateProjectReferences(referencingProjects, oldProjectFilePath, projectFilePath);
                 });
 
-                // Step 9: Re-add project to solution, preserving solution folder location
+                // Step 10: Re-add project to solution, preserving solution folder location
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
                     SolutionFolderService.AddProjectToSolution(dte.Solution, projectFilePath, parentSolutionFolder);
                     projectReaddedToSolution = true;
                 });
 
-                // Step 10: Update using statements across the entire solution
+                // Step 11: Update using statements across the entire solution
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
                     SourceFileService.UpdateUsingStatementsInSolution(dte.Solution, currentName, newName);
                 });
 
-                // Step 11: Update fully qualified type references across the solution
+                // Step 12: Update fully qualified type references across the solution
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
                     SourceFileService.UpdateFullyQualifiedReferencesInSolution(dte.Solution, currentName, newName);
