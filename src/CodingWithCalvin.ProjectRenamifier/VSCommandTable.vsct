@@ -28,11 +28,11 @@
   <Symbols>
 	  <GuidSymbol name="ProjectRenamifier" value="{57c39070-ff59-4bf6-8be3-1f4305ff1ec4}" />
 
-	  <GuidSymbol name="CommandSetGuid" value="{1577166d-7d58-4ef1-af82-520a8966ae67}">
+	  <GuidSymbol name="CommandSetGuid" value="{eb9f6c9d-4c4f-4783-8b94-9348bb571f60}">
 		  <IDSymbol name="RenamifyProjectCommandId" value="0x0100" />
 	  </GuidSymbol>
 
-	  <GuidSymbol name="IconGuid" value="{6a050d5f-fb67-4d45-b6fc-f6f2612aa8ad}">
+	  <GuidSymbol name="IconGuid" value="{49f2bb52-c5bf-45ea-98b9-03ffff040006}">
 		  <IDSymbol name="LightningBoltIcon" value="1" />
 	  </GuidSymbol>
   </Symbols>
