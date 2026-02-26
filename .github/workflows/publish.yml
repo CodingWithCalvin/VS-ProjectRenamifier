@@ -14,5 +14,4 @@ jobs:
       extension-name: ProjectRenamifier
       display-name: 'Project Renamifier'
       marketplace-id: CodingWithCalvin.VS-ProjectRenamifier
-      description: 'Safely rename projects in Visual Studio with namespace and reference updates'
     secrets: inherit
