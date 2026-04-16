@@ -92,7 +92,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Contributors
 
 <!-- readme: contributors -start -->
-<a href="https://github.com/CalvinAllen"><img src="https://avatars.githubusercontent.com/u/41448698?v=4&s=64" width="64" height="64" align="left" alt="CalvinAllen"></a> <a href="https://github.com/facebbs1235"><img src="https://avatars.githubusercontent.com/u/188009954?v=4&s=64" width="64" height="64" align="left" alt="facebbs1235"></a> <a href="https://github.com/rgatkinson"><img src="https://avatars.githubusercontent.com/u/111943?v=4&s=64" width="64" height="64" align="left" alt="rgatkinson"></a> <a href="https://github.com/yariker"><img src="https://avatars.githubusercontent.com/u/1933456?v=4&s=64" width="64" height="64" align="left" alt="yariker"></a> <br clear="all">
+<a href="https://github.com/CalvinAllen"><img src="https://avatars.githubusercontent.com/u/41448698?v=4&s=64" width="64" height="64" align="left" alt="CalvinAllen"></a> <a href="https://github.com/facebbs1235"><img src="https://avatars.githubusercontent.com/u/188009954?v=4&s=64" width="64" height="64" align="left" alt="facebbs1235"></a> <a href="https://github.com/iikuzmychov"><img src="https://avatars.githubusercontent.com/u/37931581?v=4&s=64" width="64" height="64" align="left" alt="iikuzmychov"></a> <a href="https://github.com/rgatkinson"><img src="https://avatars.githubusercontent.com/u/111943?v=4&s=64" width="64" height="64" align="left" alt="rgatkinson"></a> <a href="https://github.com/yariker"><img src="https://avatars.githubusercontent.com/u/1933456?v=4&s=64" width="64" height="64" align="left" alt="yariker"></a> <br clear="all">
 <!-- readme: contributors -end -->
 
 ---
