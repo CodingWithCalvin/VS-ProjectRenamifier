@@ -8,6 +8,7 @@ using CodingWithCalvin.ProjectRenamifier.Services;
 using CodingWithCalvin.Otel4Vsix;
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace CodingWithCalvin.ProjectRenamifier
 {
@@ -172,8 +173,10 @@ namespace CodingWithCalvin.ProjectRenamifier
             var stepIndex = 0;
             var projectRemovedFromSolution = false;
             var projectReaddedToSolution = false;
-            List<string> referencingProjects = null;
+            List<ProjectReferenceService.ReferencingProjectInfo> referencingProjects = null;
             Project parentSolutionFolder = null;
+
+            var vsSolution = ServiceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
 
             try
             {
@@ -230,7 +233,7 @@ namespace CodingWithCalvin.ProjectRenamifier
                 // Step 9: Update references in projects that referenced this project
                 ExecuteStep(progressDialog, stepIndex++, () =>
                 {
-                    ProjectReferenceService.UpdateProjectReferences(referencingProjects, oldProjectFilePath, projectFilePath);
+                    ProjectReferenceService.UpdateProjectReferences(vsSolution, referencingProjects, oldProjectFilePath, projectFilePath);
                 });
 
                 // Step 10: Re-add project to solution, preserving solution folder location
