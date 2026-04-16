@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace CodingWithCalvin.ProjectRenamifier.Services
 {
@@ -11,16 +13,25 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
     internal static class ProjectReferenceService
     {
         /// <summary>
+        /// Metadata for a project that references the target project being renamed.
+        /// </summary>
+        public sealed class ReferencingProjectInfo
+        {
+            public string FullPath { get; set; }
+            public string UniqueName { get; set; }
+        }
+
+        /// <summary>
         /// Finds all projects in the solution that reference the specified project.
         /// </summary>
         /// <param name="solution">The solution to search.</param>
         /// <param name="targetProjectPath">The full path to the project being renamed.</param>
-        /// <returns>A list of project paths that reference the target project.</returns>
-        public static List<string> FindProjectsReferencingTarget(Solution solution, string targetProjectPath)
+        /// <returns>A list of referencing project descriptors (full path + unique name).</returns>
+        public static List<ReferencingProjectInfo> FindProjectsReferencingTarget(Solution solution, string targetProjectPath)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var referencingProjects = new List<string>();
+            var referencingProjects = new List<ReferencingProjectInfo>();
             var targetFileName = Path.GetFileName(targetProjectPath);
 
             foreach (Project project in solution.Projects)
@@ -34,7 +45,7 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
         /// <summary>
         /// Recursively searches a project (and solution folders) for references to the target.
         /// </summary>
-        private static void FindReferencesInProject(Project project, string targetProjectPath, string targetFileName, List<string> referencingProjects)
+        private static void FindReferencesInProject(Project project, string targetProjectPath, string targetFileName, List<ReferencingProjectInfo> referencingProjects)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -67,7 +78,11 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
             {
                 if (ProjectReferencesTarget(project.FullName, targetFileName))
                 {
-                    referencingProjects.Add(project.FullName);
+                    referencingProjects.Add(new ReferencingProjectInfo
+                    {
+                        FullPath = project.FullName,
+                        UniqueName = project.UniqueName,
+                    });
                 }
             }
         }
@@ -118,18 +133,77 @@ namespace CodingWithCalvin.ProjectRenamifier.Services
 
         /// <summary>
         /// Updates project references in all projects that referenced the old project path.
+        /// Each referencing project is temporarily unloaded via <see cref="IVsSolution4"/> so Visual Studio
+        /// releases its file handle before we rewrite the .csproj on disk, then reloaded afterwards.
         /// </summary>
-        /// <param name="referencingProjectPaths">Projects that need their references updated.</param>
+        /// <param name="vsSolution">The Visual Studio solution service used to unload and reload projects.</param>
+        /// <param name="referencingProjects">Projects that need their references updated.</param>
         /// <param name="oldProjectPath">The old path to the renamed project.</param>
         /// <param name="newProjectPath">The new path to the renamed project.</param>
-        public static void UpdateProjectReferences(List<string> referencingProjectPaths, string oldProjectPath, string newProjectPath)
+        public static void UpdateProjectReferences(IVsSolution vsSolution, List<ReferencingProjectInfo> referencingProjects, string oldProjectPath, string newProjectPath)
         {
-            var oldFileName = Path.GetFileName(oldProjectPath);
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            foreach (var projectPath in referencingProjectPaths)
+            var oldFileName = Path.GetFileName(oldProjectPath);
+            var solution4 = vsSolution as IVsSolution4;
+
+            foreach (var info in referencingProjects)
             {
-                UpdateReferencesInProject(projectPath, oldFileName, oldProjectPath, newProjectPath);
+                UpdateSingleProjectReference(vsSolution, solution4, info, oldFileName, oldProjectPath, newProjectPath);
             }
+        }
+
+        private static void UpdateSingleProjectReference(
+            IVsSolution vsSolution,
+            IVsSolution4 solution4,
+            ReferencingProjectInfo info,
+            string oldFileName,
+            string oldProjectPath,
+            string newProjectPath)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var projectGuid = System.Guid.Empty;
+            var unloaded = false;
+
+            if (solution4 != null && TryGetProjectGuid(vsSolution, info.UniqueName, out projectGuid))
+            {
+                var hr = solution4.UnloadProject(ref projectGuid, (uint)_VSProjectUnloadStatus.UNLOADSTATUS_UnloadedByUser);
+                unloaded = ErrorHandler.Succeeded(hr);
+            }
+
+            try
+            {
+                UpdateReferencesInProject(info.FullPath, oldFileName, oldProjectPath, newProjectPath);
+            }
+            finally
+            {
+                if (unloaded)
+                {
+                    solution4.ReloadProject(ref projectGuid);
+                }
+            }
+        }
+
+        private static bool TryGetProjectGuid(IVsSolution vsSolution, string uniqueName, out System.Guid projectGuid)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            projectGuid = System.Guid.Empty;
+
+            if (string.IsNullOrEmpty(uniqueName))
+            {
+                return false;
+            }
+
+            var hr = vsSolution.GetProjectOfUniqueName(uniqueName, out var hierarchy);
+            if (!ErrorHandler.Succeeded(hr) || hierarchy == null)
+            {
+                return false;
+            }
+
+            hr = vsSolution.GetGuidOfProject(hierarchy, out projectGuid);
+            return ErrorHandler.Succeeded(hr) && projectGuid != System.Guid.Empty;
         }
 
         /// <summary>
